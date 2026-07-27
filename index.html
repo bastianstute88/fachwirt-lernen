@@ -248,12 +248,19 @@
         <div class="lbl"><span id="qTheme">Thema</span><span id="qCount"></span></div>
         <div class="bar"><i id="qProgress" style="width:0%"></i></div>
       </div>
+      <button class="rbtn" id="reviewBtn" onclick="reviewOpen(0)" style="display:none" aria-label="Letzte Lösung ansehen">↩︎</button>
       <div class="streakpill" id="streakPill" style="visibility:hidden">🔥 <span id="streakNum">0</span></div>
     </div>
     <div class="qwrap" id="qwrap"></div>
     <div class="dock" id="dock"></div>
   </section>
 
+</div>
+
+<!-- REVIEW -->
+<div class="reviewLayer" id="reviewLayer">
+  <div class="rHead"><button class="rbtn" onclick="reviewClose()">✕</button><b id="rTitle">🔎 Rückblick</b></div>
+  <div class="rBody" id="reviewBody"></div>
 </div>
 
 <!-- OVERLAY -->
@@ -379,11 +386,11 @@ function pickNext(pool, lastId, forceHard){
 function startTheme(hb){
   const t=THEMES.find(x=>x.id===hb);
   const pool=QUESTIONS.filter(q=>q.hb===hb);
-  session={mode:"theme",hb,pool,label:t.emoji+" "+t.name,endless:false,streakR:0,streakW:0,done:0,lastId:null};
+  session={mode:"theme",hb,pool,label:t.emoji+" "+t.name,endless:false,streakR:0,streakW:0,done:0,lastId:null,history:[],lastChosen:null};
   show('quiz'); nextQuestion();
 }
 function startShuffle(){
-  session={mode:"shuffle",pool:QUESTIONS.slice(),label:"🔀 Shuffle",endless:true,streakR:0,streakW:0,done:0,lastId:null};
+  session={mode:"shuffle",pool:QUESTIONS.slice(),label:"🔀 Shuffle",endless:true,streakR:0,streakW:0,done:0,lastId:null,history:[],lastChosen:null};
   show('quiz'); nextQuestion();
 }
 function goHome(){session=null;renderHome();show('home');}
@@ -403,9 +410,16 @@ function updateQTop(){
   const pill=document.getElementById('streakPill');
   if(session.streakR>=3){pill.style.visibility="visible";document.getElementById('streakNum').textContent=session.streakR;}
   else{pill.style.visibility="hidden";}
+  const rb=document.getElementById('reviewBtn');
+  if(rb) rb.style.display=(session.history&&session.history.length)?'flex':'none';
 }
 
 function nextQuestion(){
+  // abgeschlossene Frage in den Rückblick-Verlauf legen
+  if(session.current && session.answeredThis){
+    session.history.push({q:session.current, chosen: session.current.typ==='mc'?session.lastChosen:null});
+    if(session.history.length>60) session.history.shift();
+  }
   // Theme finished?
   if(session.mode==="theme" && session.pool.every(q=>isMastered(q.id))){
     return renderThemeDone();
@@ -485,6 +499,7 @@ function grade(id, correct){
 
 function answerMC(i){
   if(session.answeredThis)return; session.answeredThis=true;
+  session.lastChosen=i;
   const q=session.current; const correct=(i===q.correct);
   const opts=document.querySelectorAll('#opts .opt');
   opts.forEach((el,idx)=>{
@@ -512,6 +527,7 @@ function revealCard(){
 }
 function rateCard(res){
   const q=session.current;
+  session.answeredThis=true;
   if(res==='mid'){ /* bleibt in Box, zählt als beantwortet, kein Fortschritt */
     state.boxes[q.id]=Math.max(1,box(q.id)); state.answered=(state.answered||0)+1;
     session.streakR=0; session.done++; save();
@@ -644,6 +660,33 @@ function renderThemeDone(){
     `<button class="btn" onclick="goHome()">Zur Übersicht</button>
      <button class="btn ghost" style="margin-top:10px" onclick="resetTheme(${session.hb},true)">🔄 Thema zurücksetzen</button>`;
 }
+
+/* ---------------- RÜCKBLICK (Zurück-Button) ---------------- */
+function reviewOpen(back){
+  if(!session||!session.history||!session.history.length) return;
+  back=Math.max(0,Math.min(back||0, session.history.length-1));
+  const i=session.history.length-1-back;
+  const h=session.history[i], q=h.q, chosen=h.chosen;
+  const tagClass={mc:"tag-mc",karte:"tag-karte",rechnen:"tag-rechnen"}[q.typ];
+  const tagText={mc:"Wissen · Multiple Choice",karte:"Verständnis · Karteikarte",rechnen:"Rechnen · Zahleneingabe"}[q.typ];
+  const kr=q.schwer===3?'<span class="kracher">🔥 IHK-Kracher</span>':"";
+  let html=`<div class="tagrow"><div class="typeTag ${tagClass}" style="margin-bottom:0">${tagText}</div><span class="qnr">Nr. ${q.nr||"–"}</span></div>${kr}<div class="qtext">${q.frage}</div>`;
+  if(q.typ==="mc"){
+    html+=q.opts.map((o,idx)=>{let c="opt",mk="";if(idx===q.correct){c+=" correct";mk="✓";}else if(idx===chosen){c+=" wrong";mk="✕";}else c+=" dim";return `<div class="${c}" style="pointer-events:none"><span class="mk">${mk}</span><span>${o}</span></div>`;}).join("");
+  } else if(q.typ==="karte"){
+    html+=`<div class="reveal"><div class="answerLine">Antwort</div>${q.antwort}</div>`;
+  } else {
+    html+=`<div class="reveal"><div class="answerLine">Ergebnis: ${fmt(q.loesung)}${q.einheit?" "+q.einheit:""}</div>${q.loesungsweg}</div>`;
+  }
+  html+=`<div class="feedback ok"><div class="head">📖 Zur Erinnerung</div>${q.erklaerung?`<div>${q.erklaerung}</div>`:""}<div class="src">📖 ${q.quelle}</div></div>`;
+  html+=`<div style="display:flex;gap:10px;margin-top:16px">`;
+  if(i>0) html+=`<button class="btn ghost" onclick="reviewOpen(${back+1})">‹ Frühere</button>`;
+  html+=`<button class="btn" onclick="reviewClose()">Fertig – zurück</button></div>`;
+  document.getElementById('reviewBody').innerHTML=html;
+  document.getElementById('rTitle').textContent="🔎 Rückblick · "+(back+1)+". Frage zurück";
+  const lay=document.getElementById('reviewLayer'); lay.classList.add('show'); lay.scrollTop=0;
+}
+function reviewClose(){ document.getElementById('reviewLayer').classList.remove('show'); }
 
 /* ---------------- OVERLAY / TOAST ---------------- */
 let overlayQueue=false;
