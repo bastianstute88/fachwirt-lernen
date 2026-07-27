@@ -40,6 +40,8 @@
   .hero .kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.72;font-weight:700}
   .hero h1{margin:.28em 0 .1em;font-size:26px;font-weight:800;letter-spacing:-.02em}
   .hero .sub{opacity:.82;font-size:14px}
+  #greet{transition:max-height .6s ease,opacity .5s ease,margin .6s ease;max-height:80px;overflow:hidden}
+  #greet.hide{max-height:0;opacity:0;margin-top:0;margin-bottom:0}
   .ringwrap{display:flex;align-items:center;gap:18px;margin-top:22px}
   .ring{width:96px;height:96px;flex:0 0 96px;position:relative}
   .ring svg{transform:rotate(-90deg)}
@@ -304,11 +306,14 @@ function changeName(){
 
 /* ---------------- HOME ---------------- */
 let homeGreeted=false;
-const HOME_LINES=["Schön, dass du übst! 📚","Weiter geht’s 💪","Auf geht’s! ✨","Bleib dran 🎯","Gut, dass du da bist 🙂","Jede Frage bringt dich näher 🚀"];
 function renderHome(){
   const g=document.getElementById('greet');
-  if(!homeGreeted){ g.textContent="Hallo "+state.name+" 👋"; homeGreeted=true; }
-  else { g.textContent=HOME_LINES[Math.floor(Math.random()*HOME_LINES.length)]; }
+  if(!homeGreeted){
+    homeGreeted=true;
+    g.textContent="Hallo "+state.name+" 👋";
+    g.classList.remove('hide');
+    setTimeout(()=>{const el=document.getElementById('greet');if(el)el.classList.add('hide');},3800);
+  } else { g.classList.add('hide'); }
   const total=QUESTIONS.length;
   const mastered=QUESTIONS.filter(q=>isMastered(q.id)).length;
   const pct=total?Math.round(mastered/total*100):0;
