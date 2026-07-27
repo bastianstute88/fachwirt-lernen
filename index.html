@@ -129,6 +129,8 @@
   .calcGrid .cl{background:#fbe9e9;color:var(--bad)}
   .calcInsert{margin-top:10px;width:100%;background:var(--card);border:1.5px dashed var(--blue);color:var(--blue-dark);border-radius:12px;padding:11px;font-size:13px;font-weight:800}
   .numrow .unit{display:flex;align-items:center;font-weight:800;color:var(--muted);font-size:16px;padding:0 4px}
+  .signBtn{flex:0 0 auto;font-size:22px;font-weight:800;padding:0 18px;border:1.5px solid var(--line);border-radius:15px;background:#f1f5fa;color:var(--ink)}
+  .signBtn:active{transform:scale(.96)}
 
   .reveal{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:16px 16px;font-size:15px;margin-top:4px}
   .reveal .answerLine{font-weight:800;font-size:16px;margin-bottom:8px;color:var(--blue-dark)}
@@ -160,8 +162,15 @@
   .pop p{color:var(--ink-soft);font-size:15px;margin:.3em 0 20px}
   .pop button{background:var(--blue);color:#fff;border-radius:14px;padding:13px 28px;font-weight:800;font-size:15px;width:100%}
 
-  .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translateX(-50%) translateY(-140%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;font-weight:700;z-index:50;box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.2,1.2,.4,1);display:flex;align-items:center;gap:8px;max-width:90%}
-  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast{position:fixed;left:50%;top:max(58px, calc(env(safe-area-inset-top) + 20px));transform:translateX(-50%) translateY(-180%);opacity:0;visibility:hidden;background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;font-weight:700;z-index:50;box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.2,1.2,.4,1),opacity .3s ease,visibility .35s;display:flex;align-items:center;gap:8px;max-width:90%}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;visibility:visible}
+
+  .rbtn{font-size:18px;width:38px;height:38px;border-radius:12px;background:#f1f5fa;color:var(--ink);display:flex;align-items:center;justify-content:center;flex:0 0 38px}
+  .reviewLayer{position:fixed;inset:0;z-index:45;background:var(--bg);display:none;flex-direction:column;overflow-y:auto}
+  .reviewLayer.show{display:flex;animation:fade .2s}
+  .reviewLayer .rHead{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;gap:12px;max-width:520px;margin:0 auto;width:100%}
+  .reviewLayer .rHead b{flex:1;font-size:14px;font-weight:800;color:var(--ink-soft)}
+  .reviewLayer .rBody{padding:20px 16px 44px;max-width:520px;margin:0 auto;width:100%}
 
   /* name gate */
   .gate{padding:calc(env(safe-area-inset-top) + 80px) 26px 40px;text-align:center}
@@ -437,8 +446,8 @@ function renderQuestion(q){
 
   if(q.typ==="rechnen"){
     calcExpr="";calcResult=null;
-    html+=`<div class="numrow"><input id="numIn" type="text" inputmode="decimal" placeholder="Ergebnis…" autocomplete="off">${q.einheit?`<span class="unit">${q.einheit}</span>`:''}</div>
-           <div style="font-size:12px;color:var(--muted);margin-left:4px">Tipp: Komma oder Punkt möglich${q.einheit?' · ohne Einheit':''}.</div>
+    html+=`<div class="numrow"><button class="signBtn" onclick="toggleSign()" aria-label="Vorzeichen wechseln">±</button><input id="numIn" type="text" inputmode="decimal" placeholder="Ergebnis…" autocomplete="off">${q.einheit?`<span class="unit">${q.einheit}</span>`:''}</div>
+           <div style="font-size:12px;color:var(--muted);margin-left:4px">Tipp: „±" für Minus · Komma oder Punkt möglich${q.einheit?' · ohne Einheit':''}.</div>
            <button class="calcToggle" onclick="calcToggle()" id="calcToggleBtn">🧮 Taschenrechner öffnen</button>
            <div id="calc" class="calc" style="display:none">
              <div class="calcDisp" id="calcDisp">0</div>
@@ -525,6 +534,12 @@ function parseNum(s){
   if(r.includes(',')&&r.includes('.')) r=r.replace(/\./g,'').replace(',','.'); // 1.234,56 -> 1234.56
   else if(r.includes(',')) r=r.replace(',','.');                                // 0,5 -> 0.5
   return parseFloat(r);
+}
+function toggleSign(){
+  const inp=document.getElementById('numIn'); if(!inp) return;
+  let v=inp.value.trim();
+  inp.value = v.startsWith('-') ? v.slice(1) : '-'+v;
+  inp.focus();
 }
 /* ---- Taschenrechner ---- */
 let calcExpr="",calcResult=null;
