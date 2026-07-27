@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b3d6b">
+<title>Fachwirt Lernen · Simone</title>
+<style>
+  :root{
+    --blue:#0b5cab; --blue-dark:#073d73; --blue-deep:#0b2f52;
+    --ink:#10141a; --ink-soft:#3a434f; --muted:#7d8794;
+    --bg:#eef1f5; --card:#ffffff; --line:#e2e7ee;
+    --good:#1f9d55; --good-bg:#e6f6ec; --bad:#d64545; --bad-bg:#fbe9e9;
+    --gold:#e0a53a;
+    --shadow:0 6px 22px rgba(16,20,26,.10);
+    --r:20px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg); color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.45;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .app{max-width:520px;margin:0 auto;min-height:100vh;position:relative;overflow:hidden}
+  .screen{display:none;animation:fade .28s ease}
+  .screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  button{font-family:inherit;cursor:pointer;border:none}
+
+  /* ---------- HOME ---------- */
+  .hero{
+    background:linear-gradient(160deg,var(--blue-deep),var(--blue-dark) 60%,var(--blue));
+    color:#fff;padding:calc(env(safe-area-inset-top) + 26px) 22px 30px;border-radius:0 0 28px 28px;
+    position:relative;
+  }
+  .hero .kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.72;font-weight:700}
+  .hero h1{margin:.28em 0 .1em;font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .hero .sub{opacity:.82;font-size:14px}
+  .ringwrap{display:flex;align-items:center;gap:18px;margin-top:22px}
+  .ring{width:96px;height:96px;flex:0 0 96px;position:relative}
+  .ring svg{transform:rotate(-90deg)}
+  .ring .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ring .pct b{font-size:22px;font-weight:800;line-height:1}
+  .ring .pct span{font-size:10px;opacity:.8;letter-spacing:.08em;text-transform:uppercase}
+  .heroStats{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .stat{background:rgba(255,255,255,.12);border-radius:14px;padding:10px 12px}
+  .stat b{display:block;font-size:19px;font-weight:800}
+  .stat span{font-size:11px;opacity:.82}
+
+  .wrap{padding:20px 16px 40px}
+  .sectionTitle{font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:6px 4px 12px}
+
+  .shuffle{
+    width:100%;display:flex;align-items:center;gap:14px;background:var(--ink);color:#fff;
+    border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);margin-bottom:22px;text-align:left;
+  }
+  .shuffle .em{font-size:26px}
+  .shuffle .t{flex:1}
+  .shuffle .t b{display:block;font-size:16px;font-weight:800}
+  .shuffle .t span{font-size:12px;opacity:.7}
+  .shuffle .chev{opacity:.6;font-size:20px}
+
+  .cards{display:grid;gap:12px}
+  .tcard{
+    display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);text-align:left;width:100%;
+    transition:transform .12s ease;
+  }
+  .tcard:active{transform:scale(.985)}
+  .tcard .emoji{font-size:26px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#f1f5fa;border-radius:13px;flex:0 0 44px}
+  .tcard .body{flex:1;min-width:0}
+  .tcard .body h3{margin:0;font-size:15.5px;font-weight:800;letter-spacing:-.01em}
+  .tcard .body .meta{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .bar{height:7px;background:#eef2f7;border-radius:99px;overflow:hidden;margin-top:9px}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#2b8fe0);border-radius:99px;transition:width .5s ease}
+  .tcard .done{margin-left:6px;color:var(--good);font-size:20px;flex:0 0 auto}
+
+  .footlinks{display:flex;gap:10px;margin-top:26px}
+  .footlinks button{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+
+  /* ---------- QUIZ ---------- */
+  .qtop{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .qtop .back{font-size:22px;width:38px;height:38px;border-radius:12px;background:#f1f5fa;color:var(--ink);display:flex;align-items:center;justify-content:center;flex:0 0 38px}
+  .qtop .qbar{flex:1}
+  .qtop .qbar .lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;justify-content:space-between}
+  .qtop .qbar .bar{margin-top:6px}
+  .streakpill{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:800;background:#fff5e2;color:#b9791a;padding:6px 10px;border-radius:99px;flex:0 0 auto}
+
+  .qwrap{padding:20px 16px 130px}
+  .typeTag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:99px;margin-bottom:14px}
+  .tag-mc{background:#e8f0fb;color:var(--blue-dark)}
+  .tag-karte{background:#efeaf9;color:#5b3ea6}
+  .tag-rechnen{background:#e6f6ec;color:var(--good)}
+  .qtext{font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.35;margin-bottom:20px}
+
+  .opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:15px;padding:15px 16px;font-size:15.5px;font-weight:600;color:var(--ink);margin-bottom:10px;transition:all .12s}
+  .opt:active{transform:scale(.99)}
+  .opt .mk{width:24px;height:24px;border-radius:50%;border:2px solid #cfd8e3;flex:0 0 24px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff}
+  .opt.correct{border-color:var(--good);background:var(--good-bg)}
+  .opt.correct .mk{background:var(--good);border-color:var(--good)}
+  .opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+  .opt.wrong .mk{background:var(--bad);border-color:var(--bad)}
+  .opt.dim{opacity:.55}
+
+  .numrow{display:flex;gap:10px;align-items:stretch;margin-bottom:6px}
+  .numrow input{flex:1;font-size:22px;font-weight:800;padding:14px 16px;border:1.5px solid var(--line);border-radius:15px;background:var(--card);color:var(--ink);width:100%;text-align:center}
+  .numrow input:focus{outline:none;border-color:var(--blue)}
+  .numrow .unit{display:flex;align-items:center;font-weight:800;color:var(--muted);font-size:16px;padding:0 4px}
+
+  .reveal{background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:16px 16px;font-size:15px;margin-top:4px}
+  .reveal .answerLine{font-weight:800;font-size:16px;margin-bottom:8px;color:var(--blue-dark)}
+  .rate{display:flex;gap:10px;margin-top:14px}
+  .rate button{flex:1;border-radius:14px;padding:12px 6px;font-size:13px;font-weight:800;border:1.5px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;gap:3px}
+  .rate button .e{font-size:24px}
+  .rate .r-bad{color:var(--bad)} .rate .r-mid{color:#b9791a} .rate .r-good{color:var(--good)}
+
+  .feedback{border-radius:16px;padding:15px 16px;margin-top:16px;font-size:14.5px;animation:fade .2s}
+  .feedback.ok{background:var(--good-bg);border:1.5px solid #bfe6cd}
+  .feedback.no{background:var(--bad-bg);border:1.5px solid #f2c9c9}
+  .feedback .head{font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:6px}
+  .feedback.ok .head{color:var(--good)} .feedback.no .head{color:var(--bad)}
+  .feedback .src{margin-top:9px;font-size:11.5px;color:var(--muted);font-weight:600}
+
+  .dock{position:fixed;left:0;right:0;bottom:0;padding:14px 16px calc(env(safe-area-inset-bottom) + 14px);background:linear-gradient(to top,var(--bg) 72%,transparent);max-width:520px;margin:0 auto}
+  .btn{width:100%;background:var(--blue);color:#fff;border-radius:16px;padding:16px;font-size:16px;font-weight:800;box-shadow:0 6px 18px rgba(11,92,171,.32)}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1.5px solid var(--line);box-shadow:none}
+  .btn[disabled]{opacity:.4}
+
+  /* ---------- OVERLAY / TOAST ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(11,47,82,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:40;padding:28px}
+  .overlay.show{display:flex;animation:fade .2s}
+  .pop{background:var(--card);border-radius:24px;padding:30px 24px;text-align:center;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:pop .35s cubic-bezier(.2,1.3,.4,1)}
+  @keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+  .pop .big{font-size:56px;line-height:1;margin-bottom:8px}
+  .pop h2{margin:.2em 0;font-size:22px;font-weight:800}
+  .pop p{color:var(--ink-soft);font-size:15px;margin:.3em 0 20px}
+  .pop button{background:var(--blue);color:#fff;border-radius:14px;padding:13px 28px;font-weight:800;font-size:15px;width:100%}
+
+  .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translateX(-50%) translateY(-140%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-size:14px;font-weight:700;z-index:50;box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.2,1.2,.4,1);display:flex;align-items:center;gap:8px;max-width:90%}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* name gate */
+  .gate{padding:calc(env(safe-area-inset-top) + 80px) 26px 40px;text-align:center}
+  .gate .big{font-size:52px;margin-bottom:10px}
+  .gate h1{font-size:24px;font-weight:800;margin:.2em 0}
+  .gate p{color:var(--ink-soft);margin-bottom:24px}
+  .gate input{width:100%;font-size:18px;font-weight:700;padding:15px;border:1.5px solid var(--line);border-radius:15px;text-align:center;margin-bottom:14px}
+  .gate input:focus{outline:none;border-color:var(--blue)}
+
+  .empty{text-align:center;color:var(--muted);padding:60px 20px}
+  .empty .big{font-size:46px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- NAME GATE -->
+  <section id="gate" class="screen">
+    <div class="gate">
+      <div class="big">🎓</div>
+      <h1>Fachwirt-Trainer</h1>
+      <p>Dein persönlicher Lernbegleiter für die IHK-Prüfung im Gesundheits- und Sozialwesen.</p>
+      <input id="nameInput" type="text" placeholder="Dein Vorname" autocomplete="given-name">
+      <button class="btn" onclick="saveName()">Los geht’s 🚀</button>
+    </div>
+  </section>
+
+  <!-- HOME -->
+  <section id="home" class="screen">
+    <div class="hero">
+      <div class="kicker">IHK Fachwirt · Gesundheit &amp; Soziales</div>
+      <h1 id="greet">Hallo Simone 👋</h1>
+      <div class="sub">Bereit für eine Runde? Jeder Tag zählt bis Oktober.</div>
+      <div class="ringwrap">
+        <div class="ring">
+          <svg width="96" height="96"><circle cx="48" cy="48" r="42" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="9"/><circle id="ringFg" cx="48" cy="48" r="42" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264"/></svg>
+          <div class="pct"><b id="ringPct">0%</b><span>gemeistert</span></div>
+        </div>
+        <div class="heroStats">
+          <div class="stat"><b id="stMastered">0</b><span>Fragen sitzen</span></div>
+          <div class="stat"><b id="stTotal">0</b><span>Fragen gesamt</span></div>
+          <div class="stat"><b id="stStreak">0</b><span>Best-Serie 🔥</span></div>
+          <div class="stat"><b id="stAnswered">0</b><span>beantwortet</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <button class="shuffle" onclick="startShuffle()">
+        <span class="em">🔀</span>
+        <span class="t"><b>Shuffle-Modus</b><span>Endlos, alle Themen gemischt – schwache Fragen öfter</span></span>
+        <span class="chev">›</span>
+      </button>
+
+      <div class="sectionTitle">Themengebiete</div>
+      <div id="themeCards" class="cards"></div>
+
+      <div class="footlinks">
+        <button onclick="resetAll()">🔄 Alles zurücksetzen</button>
+        <button onclick="exportData()">💾 Fortschritt sichern</button>
+      </div>
+      <div class="footlinks" style="margin-top:10px">
+        <button onclick="importData()">📥 Fortschritt laden</button>
+        <button onclick="changeName()">✏️ Name ändern</button>
+      </div>
+      <p style="text-align:center;color:var(--muted);font-size:11px;margin-top:22px">Testversion mit Beispiel-Fragen · der volle Fragenkatalog folgt 💙</p>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz" class="screen">
+    <div class="qtop">
+      <button class="back" onclick="goHome()">‹</button>
+      <div class="qbar">
+        <div class="lbl"><span id="qTheme">Thema</span><span id="qCount"></span></div>
+        <div class="bar"><i id="qProgress" style="width:0%"></i></div>
+      </div>
+      <div class="streakpill" id="streakPill" style="visibility:hidden">🔥 <span id="streakNum">0</span></div>
+    </div>
+    <div class="qwrap" id="qwrap"></div>
+    <div class="dock" id="dock"></div>
+  </section>
+
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay"><div class="pop">
+  <div class="big" id="popEmoji">🎉</div>
+  <h2 id="popTitle"></h2>
+  <p id="popText"></p>
+  <button onclick="closeOverlay()" id="popBtn">Weiter</button>
+</div></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastMsg"></span></div>
+
+<script>
+/* =========================================================
+   FACHWIRT LERN-APP · Test-Build
+   Fragenkatalog folgt – dies ist ein repräsentativer Auszug
+   ========================================================= */
+
+const THEMES = [
+  {id:1, emoji:"🏛️", name:"Grundlagen & System", desc:"Wirtschaft · Sozial- & Gesundheitssystem · Recht"},
+  {id:2, emoji:"✅", name:"Qualitätsmanagement", desc:"Donabedian · PDCA · Ishikawa · FMEA"},
+  {id:3, emoji:"📊", name:"Projekte & Schnittstellen", desc:"SMART · Netzplan · Lasten-/Pflichtenheft"},
+  {id:4, emoji:"🧮", name:"BWL & Rechnungswesen", desc:"Kosten · Kennzahlen · Controlling"},
+  {id:5, emoji:"👥", name:"Personal & Führung", desc:"Beschaffung · Motivation · Ausbildung"},
+  {id:6, emoji:"📣", name:"Marketing & PR", desc:"Marketing-Mix · Strategie · Kennzahlen"},
+];
+
+/* typ: 'mc' | 'karte' | 'rechnen'
+   mc:      opts[], correct(index)
+   karte:   antwort (aufgedeckt)
+   rechnen: loesung(number), toleranz, einheit, loesungsweg  */
+const QUESTIONS = [
+  // ---------------- HB1 ----------------
+  {id:"g1",hb:1,typ:"mc",frage:"Welches Sozialgesetzbuch (SGB) regelt die gesetzliche Pflegeversicherung?",opts:["SGB V","SGB IX","SGB XI","SGB VII"],correct:2,erklaerung:"SGB XI = Pflegeversicherung. Merke: SGB V = Krankenversicherung, SGB VII = Unfallversicherung, SGB IX = Rehabilitation und Teilhabe.",quelle:"HB1 · Sozialgesetzbücher"},
+  {id:"g2",hb:1,typ:"mc",frage:"In welchem Jahr wurde die Pflegeversicherung als jüngste Säule der Sozialversicherung eingeführt?",opts:["1889","1927","1995","2005"],correct:2,erklaerung:"Reihenfolge der 5 Säulen: Kranken 1883, Unfall 1884, Renten 1889, Arbeitslosen 1927, Pflege 1995. Die Pflegeversicherung gilt als „Teilkasko“.",quelle:"HB1 · 5 Säulen der Sozialversicherung"},
+  {id:"g3",hb:1,typ:"mc",frage:"Welcher Zweig der Sozialversicherung wird allein vom Arbeitgeber finanziert?",opts:["Krankenversicherung","Unfallversicherung","Rentenversicherung","Pflegeversicherung"],correct:1,erklaerung:"Die gesetzliche Unfallversicherung (SGB VII) trägt allein der Arbeitgeber – die übrigen Zweige werden paritätisch von Arbeitgeber und Arbeitnehmer getragen.",quelle:"HB1 · Sozialversicherung"},
+  {id:"g4",hb:1,typ:"mc",frage:"Wer trägt bei der dualen Krankenhausfinanzierung die Investitionskosten (z. B. Neubau, Großgeräte)?",opts:["Die Krankenkassen","Die Bundesländer","Der Bund","Die Patienten"],correct:1,erklaerung:"Dual = Investitionskosten durch die Bundesländer, Betriebskosten durch die Krankenkassen (über DRG-Fallpauschalen). Die Reha ist dagegen monistisch finanziert.",quelle:"HB1 · Krankenhausfinanzierung"},
+  {id:"g5",hb:1,typ:"karte",frage:"Erkläre den Unterschied zwischen dem Bismarck- und dem Beveridge-Modell der Gesundheitsfinanzierung.",antwort:"Bismarck-Modell: beitragsfinanziert und an Beschäftigung gekoppelt (Sozialversicherung, z. B. Deutschland). Beveridge-Modell: steuerfinanziert und staatlich organisiert, Zugang für alle Bürger (z. B. NHS in Großbritannien).",erklaerung:"Bismarck = Beiträge & Kassen, Beveridge = Steuern & Staat.",quelle:"HB1 · Gesundheitssysteme"},
+  {id:"g6",hb:1,typ:"karte",frage:"Was besagt das Subsidiaritätsprinzip im Sozialwesen?",antwort:"„So viel Eigenverantwortung wie möglich, so viel Staat wie nötig.“ Die jeweils kleinere Einheit hilft zuerst (Selbsthilfe vor Fremdhilfe); übergeordnete/staatliche Stellen greifen erst ein, wenn die untere Ebene überfordert ist. Freie Träger haben Vorrang vor öffentlichen.",erklaerung:"Vorrang der kleineren Einheit & der freien Träger.",quelle:"HB1 · Sozialprinzipien"},
+  {id:"g7",hb:1,typ:"karte",frage:"Nenne die vier Ziele des „magischen Vierecks“ der Wirtschaftspolitik.",antwort:"1) Stabiles Preisniveau, 2) hoher Beschäftigungsstand, 3) stetiges & angemessenes Wirtschaftswachstum, 4) außenwirtschaftliches Gleichgewicht. (Gesetzlich verankert im Stabilitätsgesetz 1967.)",erklaerung:"„Magisch“, weil die Ziele teils im Konflikt zueinander stehen.",quelle:"HB1 · Wirtschaftspolitik"},
+
+  // ---------------- HB2 ----------------
+  {id:"q1",hb:2,typ:"mc",frage:"Wie heißen die drei Qualitätsdimensionen nach Donabedian?",opts:["Input-, Output-, Outcome-Qualität","Struktur-, Prozess-, Ergebnisqualität","Plan-, Ist-, Soll-Qualität","Grund-, Kern-, Zusatzqualität"],correct:1,erklaerung:"Donabedian unterscheidet Strukturqualität (Rahmenbedingungen: Personal, Ausstattung), Prozessqualität (Abläufe) und Ergebnisqualität (Behandlungsergebnis, z. B. Wundheilung).",quelle:"HB2 · Qualitätsdimensionen"},
+  {id:"q2",hb:2,typ:"karte",frage:"Wofür stehen die vier Buchstaben des PDCA-Zyklus?",antwort:"Plan (planen) – Do (umsetzen) – Check (überprüfen) – Act (verbessern/standardisieren). Auch „Deming-Kreis“ genannt; Basis der kontinuierlichen Verbesserung (KVP).",erklaerung:"Endlos-Kreislauf zur ständigen Verbesserung.",quelle:"HB2 · PDCA"},
+  {id:"q3",hb:2,typ:"mc",frage:"Wozu dient ein Ishikawa-Diagramm?",opts:["Zur Terminplanung eines Projekts","Zur Ursache-Wirkungs-Analyse eines Problems","Zur Bilanzierung von Kosten","Zur Personalbedarfsermittlung"],correct:1,erklaerung:"Das Ishikawa- (Fischgräten-) Diagramm ordnet mögliche Ursachen eines Problems Kategorien zu (z. B. 6M: Mensch, Maschine, Methode, Material, Milieu, Messung).",quelle:"HB2 · Qualitätswerkzeuge"},
+  {id:"q4",hb:2,typ:"rechnen",frage:"FMEA: Berechne die Risikoprioritätszahl (RPZ) bei Bedeutung B = 6, Auftretenswahrscheinlichkeit A = 4 und Entdeckungswahrscheinlichkeit E = 5.",loesung:120,toleranz:0,einheit:"",loesungsweg:"RPZ = B × A × E = 6 × 4 × 5 = 120. Je höher die RPZ, desto dringender ist Handlungsbedarf. (Skala je Faktor meist 1–10.)",quelle:"HB2 · FMEA"},
+  {id:"q5",hb:2,typ:"mc",frage:"Was beschreibt das Pareto-Prinzip im Qualitätsmanagement?",opts:["Jeder Fehler ist gleich wichtig","Ca. 80 % der Wirkung stammen aus ca. 20 % der Ursachen","Qualität kostet nichts","Fehler lassen sich nie vermeiden"],correct:1,erklaerung:"80/20-Regel: Mit dem Beheben der wenigen wesentlichen Ursachen (20 %) lässt sich der Großteil der Probleme (80 %) lösen – hilft beim Priorisieren.",quelle:"HB2 · Pareto"},
+  {id:"q6",hb:2,typ:"karte",frage:"Worin unterscheiden sich Qualitätsmanagement (QM) und Qualitätssicherung (QS)?",antwort:"QM ist der umfassende Managementansatz: Qualität planen, lenken, sichern UND kontinuierlich verbessern. QS ist ein Teilbereich davon: das Erfüllen und Überprüfen festgelegter Anforderungen (Fehler vermeiden/aufdecken).",erklaerung:"QM = Oberbegriff, QS = Teilaufgabe.",quelle:"HB2 · Grundbegriffe"},
+
+  // ---------------- HB3 ----------------
+  {id:"p1",hb:3,typ:"karte",frage:"Wofür steht die SMART-Regel bei der Zielformulierung?",antwort:"Spezifisch – Messbar – Attraktiv/Akzeptiert – Realistisch – Terminiert. Ein gutes Ziel erfüllt alle fünf Kriterien.",erklaerung:"Macht Ziele überprüfbar statt vage.",quelle:"HB3 · Zielformulierung"},
+  {id:"p2",hb:3,typ:"mc",frage:"Worin unterscheiden sich Lastenheft und Pflichtenheft?",opts:["Lastenheft = Auftragnehmer, Pflichtenheft = Auftraggeber","Lastenheft = das WAS/WARUM (Auftraggeber), Pflichtenheft = das WIE (Auftragnehmer)","Beide beschreiben dasselbe","Lastenheft betrifft nur Kosten, Pflichtenheft nur Termine"],correct:1,erklaerung:"Das Lastenheft formuliert der Auftraggeber (Anforderungen: Was & Warum). Das Pflichtenheft erstellt der Auftragnehmer als Antwort darauf (Umsetzung: Wie).",quelle:"HB3 · Projektdokumente"},
+  {id:"p3",hb:3,typ:"mc",frage:"Welche drei Größen bilden das „magische Dreieck“ des Projektmanagements?",opts:["Personal, Material, Maschine","Zeit, Kosten, Qualität (Leistung)","Plan, Do, Check","Vergangenheit, Gegenwart, Zukunft"],correct:1,erklaerung:"Zeit, Kosten und Qualität/Leistung stehen in Spannung: Ändert man eine Größe, wirkt sich das auf die anderen aus.",quelle:"HB3 · Magisches Dreieck"},
+  {id:"p4",hb:3,typ:"karte",frage:"Was ist der „kritische Pfad“ in einem Netzplan?",antwort:"Die längste Kette von Vorgängen im Projekt – ihre Vorgänge haben keinen Puffer (Pufferzeit = 0). Verzögert sich hier ein Vorgang, verzögert sich das gesamte Projekt.",erklaerung:"Kritischer Pfad = Vorgänge mit Puffer 0.",quelle:"HB3 · Netzplantechnik"},
+
+  // ---------------- HB4 ----------------
+  {id:"r1",hb:4,typ:"rechnen",frage:"Ein Produkt wird für 80 € verkauft, die variablen Stückkosten betragen 55 €. Wie hoch ist der Stück-Deckungsbeitrag?",loesung:25,toleranz:0,einheit:"€",loesungsweg:"Stück-Deckungsbeitrag = Verkaufspreis − variable Stückkosten = 80 € − 55 € = 25 €. Der DB deckt zunächst die Fixkosten, darüber hinaus entsteht Gewinn.",quelle:"HB4 · Deckungsbeitragsrechnung"},
+  {id:"r2",hb:4,typ:"rechnen",frage:"Die Fixkosten betragen 20.000 €, der Stück-Deckungsbeitrag 25 €. Bei welcher Menge (Stück) ist der Break-even-Point erreicht?",loesung:800,toleranz:0,einheit:"Stück",loesungsweg:"Break-even-Menge = Fixkosten ÷ Stück-Deckungsbeitrag = 20.000 € ÷ 25 € = 800 Stück. Ab dem 801. Stück wird Gewinn erzielt.",quelle:"HB4 · Break-even-Analyse"},
+  {id:"r3",hb:4,typ:"rechnen",frage:"Ein Gerät kostet 30.000 € und wird linear über 6 Jahre abgeschrieben. Wie hoch ist die jährliche Abschreibung (AfA)?",loesung:5000,toleranz:0,einheit:"€",loesungsweg:"Lineare AfA = Anschaffungskosten ÷ Nutzungsdauer = 30.000 € ÷ 6 Jahre = 5.000 € pro Jahr.",quelle:"HB4 · Abschreibung"},
+  {id:"r4",hb:4,typ:"rechnen",frage:"Der Jahresüberschuss beträgt 40.000 €, das Eigenkapital 200.000 €. Wie hoch ist die Eigenkapitalrentabilität (in %)?",loesung:20,toleranz:0,einheit:"%",loesungsweg:"Eigenkapitalrentabilität = Jahresüberschuss ÷ Eigenkapital × 100 = 40.000 ÷ 200.000 × 100 = 20 %.",quelle:"HB4 · Kennzahlen"},
+  {id:"r5",hb:4,typ:"mc",frage:"Wie ist der Return on Investment (ROI) nach dem Du-Pont-Schema definiert?",opts:["Umsatz − Kosten","Umsatzrentabilität × Kapitalumschlag","Eigenkapital ÷ Gesamtkapital","Gewinn ÷ Mitarbeiterzahl"],correct:1,erklaerung:"ROI = Umsatzrentabilität × Kapitalumschlag. Er zeigt, wie effizient das eingesetzte Kapital Gewinn erwirtschaftet.",quelle:"HB4 · ROI / Du-Pont"},
+  {id:"r6",hb:4,typ:"karte",frage:"Nenne die drei Stufen der Kosten- und Leistungsrechnung (KLR).",antwort:"1) Kostenartenrechnung (Welche Kosten sind angefallen?), 2) Kostenstellenrechnung / BAB (Wo sind sie angefallen?), 3) Kostenträgerrechnung (Wofür bzw. für welches Produkt?).",erklaerung:"Welche? – Wo? – Wofür?",quelle:"HB4 · KLR"},
+
+  // ---------------- HB5 ----------------
+  {id:"h1",hb:5,typ:"rechnen",frage:"Der Bruttopersonalbedarf beträgt 11,25 Vollzeitstellen, der fortgeschriebene Personalbestand 3,00 Stellen. Wie hoch ist der Nettopersonalbedarf (in Stellen)?",loesung:8.25,toleranz:0.01,einheit:"Stellen",loesungsweg:"Nettopersonalbedarf = Bruttopersonalbedarf − fortgeschriebener Bestand = 11,25 − 3,00 = 8,25 Stellen. So viele Kräfte müssen zusätzlich beschafft werden.",quelle:"HB5 · Personalbedarfsrechnung"},
+  {id:"h2",hb:5,typ:"karte",frage:"Wofür steht das AIDA-Modell (z. B. bei einer Stellenanzeige)?",antwort:"Attention (Aufmerksamkeit) – Interest (Interesse) – Desire (Verlangen) – Action (Handlung). Eine wirksame Anzeige führt die Leser Stufe für Stufe bis zur Bewerbung.",erklaerung:"Aufmerksamkeit → Interesse → Wunsch → Handlung.",quelle:"HB5 · Personalgewinnung"},
+  {id:"h3",hb:5,typ:"mc",frage:"Welcher Faktor zählt nach Herzberg zu den Motivatoren (nicht zu den Hygienefaktoren)?",opts:["Gehalt","Arbeitsbedingungen","Anerkennung der Leistung","Beziehung zu Kollegen"],correct:2,erklaerung:"Motivatoren (z. B. Anerkennung, Verantwortung, Aufstieg) erzeugen echte Zufriedenheit. Hygienefaktoren (Gehalt, Arbeitsbedingungen, Kollegen) verhindern nur Unzufriedenheit, motivieren aber nicht.",quelle:"HB5 · Motivation (Herzberg)"},
+  {id:"h4",hb:5,typ:"karte",frage:"Nenne die vier Kompetenzfelder eines Anforderungsprofils.",antwort:"Fachkompetenz, Methodenkompetenz, Sozialkompetenz und Personal-/Selbstkompetenz. Diese werden je nach Stelle unterschiedlich gewichtet.",erklaerung:"Fach – Methode – Sozial – Person.",quelle:"HB5 · Anforderungsprofil"},
+  {id:"h5",hb:5,typ:"mc",frage:"Wie lang ist die gesetzliche Kündigungsfrist während der Probezeit (§ 622 BGB)?",opts:["2 Wochen","4 Wochen zum Monatsende","1 Monat","3 Monate"],correct:0,erklaerung:"Während der (max. 6-monatigen) Probezeit gilt eine Frist von 2 Wochen – ohne festen Termin. Danach greift die Grundfrist von 4 Wochen zum 15. oder Monatsende.",quelle:"HB5 · Arbeitsrecht"},
+  {id:"h6",hb:5,typ:"karte",frage:"Was beschreibt das Konflikteskalationsmodell nach Glasl?",antwort:"Es beschreibt 9 Eskalationsstufen in 3 Ebenen: (1) win-win – noch selbst lösbar, (2) win-lose – Unterstützung/Moderation nötig, (3) lose-lose – nur noch durch Machteingriff/Trennung lösbar. Es hilft, die passende Interventionsform (z. B. Moderation, Mediation) zu wählen.",erklaerung:"9 Stufen, 3 Ebenen: win-win → win-lose → lose-lose.",quelle:"HB5 · Konfliktmanagement"},
+
+  // ---------------- HB6 ----------------
+  {id:"m1",hb:6,typ:"mc",frage:"Welche vier Instrumente bilden den klassischen Marketing-Mix (4 P)?",opts:["People, Process, Physical, Price","Product, Price, Place, Promotion","Plan, Produkt, Preis, Prozess","Product, People, Place, Profit"],correct:1,erklaerung:"Die 4 P: Product (Produktpolitik), Price (Preispolitik), Place (Distribution), Promotion (Kommunikation). Bei Dienstleistungen um 3 P erweitert (People, Process, Physical Evidence = 7 P).",quelle:"HB6 · Marketing-Mix"},
+  {id:"m2",hb:6,typ:"rechnen",frage:"Der eigene Umsatz beträgt 3 Mio. €, der Umsatz des stärksten Konkurrenten 6 Mio. €. Wie hoch ist der relative Marktanteil (als Dezimalzahl)?",loesung:0.5,toleranz:0.01,einheit:"",loesungsweg:"Relativer Marktanteil = eigener Umsatz ÷ Umsatz des stärksten Konkurrenten = 3 Mio. ÷ 6 Mio. = 0,5. Ein Wert < 1 bedeutet: man ist kleiner als der Marktführer.",quelle:"HB6 · Marktanteil"},
+  {id:"m3",hb:6,typ:"karte",frage:"Welche vier Strategien beschreibt die Ansoff-Matrix (Produkt-Markt-Matrix)?",antwort:"Marktdurchdringung (bestehendes Produkt / bestehender Markt), Marktentwicklung (bestehendes Produkt / neuer Markt), Produktentwicklung (neues Produkt / bestehender Markt) und Diversifikation (neues Produkt / neuer Markt).",erklaerung:"Kombination aus (neu/alt) × (Produkt/Markt).",quelle:"HB6 · Wachstumsstrategien"},
+  {id:"m4",hb:6,typ:"mc",frage:"Wie heißt in der BCG-Matrix ein Produkt mit hohem Marktanteil in einem stark wachsenden Markt?",opts:["Poor Dog","Cash Cow","Star","Question Mark"],correct:2,erklaerung:"Star = hoher Marktanteil + hohes Marktwachstum (investieren). Cash Cow = hoher Anteil, geringes Wachstum (abschöpfen). Question Mark = geringer Anteil, hohes Wachstum. Poor Dog = beides gering (eliminieren).",quelle:"HB6 · BCG-Portfolio"},
+  {id:"m5",hb:6,typ:"karte",frage:"Worin unterscheiden sich Primär- und Sekundärforschung in der Marktforschung?",antwort:"Primärforschung (Field Research): Erhebung neuer, eigener Daten (z. B. Befragung, Beobachtung, Experiment). Sekundärforschung (Desk Research): Auswertung bereits vorhandener Daten (z. B. Statistiken, interne Zahlen) – schneller und günstiger.",erklaerung:"Primär = neu erheben, Sekundär = vorhandenes nutzen.",quelle:"HB6 · Marktforschung"},
+  {id:"m6",hb:6,typ:"karte",frage:"Eine Ware hat eine Preiselastizität der Nachfrage von −2. Was bedeutet das?",antwort:"Die Nachfrage reagiert elastisch: Steigt der Preis um 1 %, sinkt die nachgefragte Menge um 2 %. Der Betrag ist größer als 1 → elastische Nachfrage (bei Betrag < 1 wäre sie unelastisch).",erklaerung:"|Wert| > 1 = elastisch, |Wert| < 1 = unelastisch.",quelle:"HB6 · Preispolitik"},
+];
+
+/* ---------------- STATE ---------------- */
+const KEY="fachwirt_v1";
+const MAX_BOX=5;
+let state=load();
+
+function load(){
+  try{
+    const s=JSON.parse(localStorage.getItem(KEY));
+    if(s&&s.boxes) return s;
+  }catch(e){}
+  return {name:"", boxes:{}, answered:0, bestStreak:0};
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+function box(id){return state.boxes[id]||0;} // 0 = noch nie beantwortet
+function isMastered(id){return box(id)>=MAX_BOX;}
+
+/* ---------------- SCREENS ---------------- */
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+
+function boot(){
+  if(!state.name){show('gate');}
+  else{renderHome();show('home');}
+}
+function saveName(){
+  const v=document.getElementById('nameInput').value.trim();
+  state.name=v||"du"; save(); renderHome(); show('home');
+  toast("👋 Willkommen, "+state.name+"!");
+}
+function changeName(){
+  const v=prompt("Neuer Name:",state.name);
+  if(v!==null){state.name=v.trim()||"du";save();renderHome();}
+}
+
+/* ---------------- HOME ---------------- */
+function renderHome(){
+  document.getElementById('greet').textContent="Hallo "+state.name+" 👋";
+  const total=QUESTIONS.length;
+  const mastered=QUESTIONS.filter(q=>isMastered(q.id)).length;
+  const pct=total?Math.round(mastered/total*100):0;
+  document.getElementById('ringPct').textContent=pct+"%";
+  const circ=264, off=circ-(circ*pct/100);
+  document.getElementById('ringFg').style.strokeDashoffset=off;
+  document.getElementById('stMastered').textContent=mastered;
+  document.getElementById('stTotal').textContent=total;
+  document.getElementById('stStreak').textContent=state.bestStreak||0;
+  document.getElementById('stAnswered').textContent=state.answered||0;
+
+  const wrap=document.getElementById('themeCards');
+  wrap.innerHTML="";
+  THEMES.forEach(t=>{
+    const qs=QUESTIONS.filter(q=>q.hb===t.id);
+    const m=qs.filter(q=>isMastered(q.id)).length;
+    const p=qs.length?Math.round(m/qs.length*100):0;
+    const el=document.createElement('button');
+    el.className="tcard";
+    el.onclick=()=>startTheme(t.id);
+    el.innerHTML=`
+      <div class="emoji">${t.emoji}</div>
+      <div class="body">
+        <h3>${t.name}</h3>
+        <div class="meta">${m}/${qs.length} sitzen · ${t.desc}</div>
+        <div class="bar"><i style="width:${p}%"></i></div>
+      </div>
+      ${p===100?'<div class="done">✓</div>':'<div class="chev" style="color:var(--muted);font-size:22px">›</div>'}`;
+    wrap.appendChild(el);
+  });
+}
+
+/* ---------------- SESSION ENGINE ---------------- */
+let session=null;
+// weighting: lower box => higher weight (kommt öfter). unbeantwortet (0) hoch.
+function pickNext(pool, lastId){
+  const cand=pool.filter(q=>q.id!==lastId||pool.length===1);
+  let bestW=-1, bucket=[];
+  cand.forEach(q=>{
+    const b=box(q.id);
+    let w = b===0 ? 7 : (MAX_BOX+1-b); // 0->7, 1->5,2->4,3->3,4->2,5->1
+    if(isMastered(q.id)) w=1;
+    if(w>bestW){bestW=w;bucket=[q];}
+    else if(w===bestW){bucket.push(q);}
+  });
+  return bucket[Math.floor(Math.random()*bucket.length)];
+}
+
+function startTheme(hb){
+  const t=THEMES.find(x=>x.id===hb);
+  const pool=QUESTIONS.filter(q=>q.hb===hb);
+  session={mode:"theme",hb,pool,label:t.emoji+" "+t.name,endless:false,streakR:0,streakW:0,done:0,lastId:null};
+  show('quiz'); nextQuestion();
+}
+function startShuffle(){
+  session={mode:"shuffle",pool:QUESTIONS.slice(),label:"🔀 Shuffle",endless:true,streakR:0,streakW:0,done:0,lastId:null};
+  show('quiz'); nextQuestion();
+}
+function goHome(){session=null;renderHome();show('home');}
+
+function themeProgressLabel(){
+  if(session.mode==="shuffle") return session.done+" beantwortet";
+  const m=session.pool.filter(q=>isMastered(q.id)).length;
+  return m+"/"+session.pool.length+" sitzen";
+}
+function updateQTop(){
+  document.getElementById('qTheme').textContent=session.label;
+  document.getElementById('qCount').textContent=themeProgressLabel();
+  let p;
+  if(session.mode==="shuffle"){p=Math.min(100,(session.done%20)/20*100);}
+  else{const m=session.pool.filter(q=>isMastered(q.id)).length;p=Math.round(m/session.pool.length*100);}
+  document.getElementById('qProgress').style.width=p+"%";
+  const pill=document.getElementById('streakPill');
+  if(session.streakR>=3){pill.style.visibility="visible";document.getElementById('streakNum').textContent=session.streakR;}
+  else{pill.style.visibility="hidden";}
+}
+
+function nextQuestion(){
+  // Theme finished?
+  if(session.mode==="theme" && session.pool.every(q=>isMastered(q.id))){
+    return renderThemeDone();
+  }
+  const q=pickNext(session.pool, session.lastId);
+  session.current=q; session.lastId=q.id; session.answeredThis=false;
+  updateQTop();
+  renderQuestion(q);
+}
+
+/* ---------------- RENDER QUESTION ---------------- */
+function renderQuestion(q){
+  const wrap=document.getElementById('qwrap');
+  const dock=document.getElementById('dock');
+  const tagClass={mc:"tag-mc",karte:"tag-karte",rechnen:"tag-rechnen"}[q.typ];
+  const tagText={mc:"Wissen · Multiple Choice",karte:"Verständnis · Karteikarte",rechnen:"Rechnen · Zahleneingabe"}[q.typ];
+  let html=`<div class="typeTag ${tagClass}">${tagText}</div><div class="qtext">${q.frage}</div>`;
+
+  if(q.typ==="mc"){
+    html+=`<div id="opts">`;
+    q.opts.forEach((o,i)=>{
+      html+=`<button class="opt" onclick="answerMC(${i})"><span class="mk"></span><span>${o}</span></button>`;
+    });
+    html+=`</div><div id="fb"></div>`;
+    wrap.innerHTML=html; dock.innerHTML="";
+  }
+
+  if(q.typ==="karte"){
+    html+=`<div id="cardArea"></div><div id="fb"></div>`;
+    wrap.innerHTML=html;
+    dock.innerHTML=`<button class="btn" onclick="revealCard()">Antwort zeigen 👀</button>`;
+  }
+
+  if(q.typ==="rechnen"){
+    html+=`<div class="numrow"><input id="numIn" type="text" inputmode="decimal" placeholder="Ergebnis…" autocomplete="off">${q.einheit?`<span class="unit">${q.einheit}</span>`:''}</div>
+           <div style="font-size:12px;color:var(--muted);margin-left:4px">Tipp: Komma oder Punkt möglich${q.einheit?' · ohne Einheit':''}.</div><div id="fb"></div>`;
+    wrap.innerHTML=html;
+    dock.innerHTML=`<button class="btn" onclick="answerNum()">Prüfen ✓</button>`;
+    setTimeout(()=>{document.getElementById('numIn').focus();},250);
+    document.getElementById('numIn').addEventListener('keydown',e=>{if(e.key==='Enter')answerNum();});
+  }
+}
+
+/* ---------------- ANSWER HANDLERS ---------------- */
+function grade(id, correct){
+  // Leitner update
+  let b=box(id);
+  if(correct){ b=Math.min(MAX_BOX, (b||0)+1); }
+  else { b=1; }
+  state.boxes[id]=b;
+  state.answered=(state.answered||0)+1;
+  if(correct){session.streakR++;session.streakW=0;}
+  else{session.streakW++;session.streakR=0;}
+  if(session.streakR>state.bestStreak)state.bestStreak=session.streakR;
+  session.done++;
+  save();
+  checkMotivation();
+}
+
+function answerMC(i){
+  if(session.answeredThis)return; session.answeredThis=true;
+  const q=session.current; const correct=(i===q.correct);
+  const opts=document.querySelectorAll('#opts .opt');
+  opts.forEach((el,idx)=>{
+    el.style.pointerEvents="none";
+    if(idx===q.correct){el.classList.add('correct');el.querySelector('.mk').textContent="✓";}
+    else if(idx===i){el.classList.add('wrong');el.querySelector('.mk').textContent="✕";}
+    else{el.classList.add('dim');}
+  });
+  grade(q.id,correct);
+  showFeedback(correct,q);
+}
+
+let cardRevealed=false;
+function revealCard(){
+  const q=session.current;
+  document.getElementById('cardArea').innerHTML=
+    `<div class="reveal"><div class="answerLine">Antwort</div>${q.antwort}</div>`;
+  document.getElementById('dock').innerHTML=
+    `<div class="reveal" style="margin-top:0"><div style="font-weight:800;margin-bottom:10px;text-align:center">Wie gut wusstest du es?</div>
+      <div class="rate">
+        <button class="r-bad" onclick="rateCard(false)"><span class="e">😞</span>Nicht gewusst</button>
+        <button class="r-mid" onclick="rateCard('mid')"><span class="e">🤔</span>Fast</button>
+        <button class="r-good" onclick="rateCard(true)"><span class="e">😃</span>Gewusst!</button>
+      </div></div>`;
+}
+function rateCard(res){
+  const q=session.current;
+  if(res==='mid'){ /* bleibt in Box, zählt als beantwortet, kein Fortschritt */
+    state.boxes[q.id]=Math.max(1,box(q.id)); state.answered=(state.answered||0)+1;
+    session.streakR=0; session.done++; save();
+    proceedAfterCard(q,'mid');
+  } else {
+    grade(q.id,res);
+    proceedAfterCard(q,res);
+  }
+}
+function proceedAfterCard(q,res){
+  const msg = res===true?"Stark! ✅":res==='mid'?"Fast – das festigt sich. 🤔":"Kein Problem – kommt bald wieder. 💪";
+  document.getElementById('dock').innerHTML=`<button class="btn" onclick="nextQuestion()">Weiter →</button>`;
+  document.getElementById('fb').innerHTML=
+    `<div class="feedback ${res===true?'ok':'no'}"><div class="head">${msg}</div>${q.erklaerung?`<div>${q.erklaerung}</div>`:''}<div class="src">📖 ${q.quelle}</div></div>`;
+}
+
+function answerNum(){
+  if(session.answeredThis)return;
+  const q=session.current;
+  const raw=document.getElementById('numIn').value.trim().replace(/\s/g,'').replace('.',' ').replace(',','.').replace(' ','');
+  if(raw===""){toast("Bitte ein Ergebnis eingeben ✍️");return;}
+  const val=parseFloat(raw);
+  if(isNaN(val)){toast("Das sieht nicht nach einer Zahl aus 🤔");return;}
+  session.answeredThis=true;
+  const correct=Math.abs(val-q.loesung)<=(q.toleranz||0)+1e-9;
+  document.getElementById('numIn').style.borderColor=correct?"var(--good)":"var(--bad)";
+  document.getElementById('numIn').style.background=correct?"var(--good-bg)":"var(--bad-bg)";
+  document.getElementById('numIn').blur();
+  grade(q.id,correct);
+  const q2=q;
+  document.getElementById('fb').innerHTML=
+    `<div class="feedback ${correct?'ok':'no'}"><div class="head">${correct?'✅ Richtig!':'❌ Nicht ganz – richtig ist '+fmt(q2.loesung)+(q2.einheit?' '+q2.einheit:'')}</div><div>${q2.loesungsweg}</div><div class="src">📖 ${q2.quelle}</div></div>`;
+  document.getElementById('dock').innerHTML=`<button class="btn" onclick="nextQuestion()">Weiter →</button>`;
+}
+function fmt(n){return (Math.round(n*100)/100).toString().replace('.',',');}
+
+function showFeedback(correct,q){
+  document.getElementById('fb').innerHTML=
+    `<div class="feedback ${correct?'ok':'no'}"><div class="head">${correct?'✅ Richtig!':'❌ Leider falsch'}</div><div>${q.erklaerung}</div><div class="src">📖 ${q.quelle}</div></div>`;
+  document.getElementById('dock').innerHTML=`<button class="btn" onclick="nextQuestion()">Weiter →</button>`;
+}
+
+/* ---------------- MOTIVATION ---------------- */
+const RUN_MSGS=[
+  {e:"🔥",t:"Du hast einen Lauf!",p:s=>"10 richtig in Folge, "+s+" – weiter so, das läuft ja wie geschmiert!"},
+  {e:"🚀",t:"Nicht zu stoppen!",p:s=>"20 am Stück, "+s+"! Die IHK kann kommen."},
+  {e:"🏆",t:"Wahnsinn!",p:s=>"30 richtige Antworten hintereinander – "+s+", du bist eine Maschine!"},
+];
+function checkMotivation(){
+  if(session.streakR>0 && session.streakR%10===0){
+    const idx=Math.min(RUN_MSGS.length-1, session.streakR/10-1);
+    const m=RUN_MSGS[idx];
+    popup(m.e,m.t,m.p(state.name));
+  }
+  if(session.streakW===3){
+    popup("💪","Kopf hoch!","Nicht hängen lassen, "+state.name+" – dranbleiben, das wird schon! Genau die Fragen kommen jetzt öfter, bis sie sitzen.");
+  }
+  // mastery milestones
+  const mastered=QUESTIONS.filter(q=>isMastered(q.id)).length;
+  if(mastered>0 && mastered%25===0 && session._lastMile!==mastered){
+    session._lastMile=mastered;
+    popup("🎉","Meilenstein!",mastered+" Fragen sitzen fest, "+state.name+". Starke Arbeit!");
+  }
+}
+function renderThemeDone(){
+  const t=THEMES.find(x=>x.id===session.hb);
+  document.getElementById('qwrap').innerHTML=
+    `<div class="empty"><div class="big">🏅</div><h2 style="color:var(--ink)">${t.name} gemeistert!</h2><p>Alle Fragen dieses Themas sitzen, ${state.name}. Grandios! 🎉<br>Du kannst das Thema jederzeit auffrischen oder zurücksetzen.</p></div>`;
+  document.getElementById('dock').innerHTML=
+    `<button class="btn" onclick="goHome()">Zur Übersicht</button>
+     <button class="btn ghost" style="margin-top:10px" onclick="resetTheme(${session.hb},true)">🔄 Thema zurücksetzen</button>`;
+}
+
+/* ---------------- OVERLAY / TOAST ---------------- */
+let overlayQueue=false;
+function popup(emoji,title,text,btn){
+  document.getElementById('popEmoji').textContent=emoji;
+  document.getElementById('popTitle').textContent=title;
+  document.getElementById('popText').textContent=text;
+  document.getElementById('popBtn').textContent=btn||"Weiter so! 💙";
+  document.getElementById('overlay').classList.add('show');
+}
+function closeOverlay(){document.getElementById('overlay').classList.remove('show');}
+let toastT=null;
+function toast(msg){
+  document.getElementById('toastMsg').textContent=msg;
+  const el=document.getElementById('toast');el.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+/* ---------------- RESET / DATA ---------------- */
+function resetTheme(hb,silent){
+  if(!silent && !confirm("Diesen Themenbereich wirklich zurücksetzen? Der Fortschritt dieses Themas geht verloren."))return;
+  QUESTIONS.filter(q=>q.hb===hb).forEach(q=>{delete state.boxes[q.id];});
+  save();
+  if(silent){goHome();} else {renderHome();}
+  toast("🔄 Thema zurückgesetzt");
+}
+function resetAll(){
+  if(!confirm("Wirklich ALLES zurücksetzen? Der gesamte Lernfortschritt geht verloren."))return;
+  state.boxes={};state.answered=0;state.bestStreak=0;save();renderHome();
+  toast("🔄 Alles zurückgesetzt");
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(state)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download="fachwirt-fortschritt.json";a.click();
+  URL.revokeObjectURL(url);
+  toast("💾 Fortschritt gesichert");
+}
+function importData(){
+  const inp=document.createElement('input');inp.type="file";inp.accept=".json,application/json";
+  inp.onchange=e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=()=>{try{const s=JSON.parse(r.result);if(s&&s.boxes){state=s;save();renderHome();toast("📥 Fortschritt geladen");}else toast("❌ Datei ungültig");}catch(err){toast("❌ Datei ungültig");}};
+    r.readAsText(f);
+  };
+  inp.click();
+}
+
+boot();
+</script>
+</body>
+</html>
