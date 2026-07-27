@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fachwirt">
 <meta name="theme-color" content="#0b3d6b">
-<title>Fachwirt Lernen · Simone</title>
+<title>Fachwirt-Trainer</title>
 <style>
   :root{
     --blue:#0b5cab; --blue-dark:#073d73; --blue-deep:#0b2f52;
@@ -297,7 +298,7 @@ function boot(){
 function saveName(){
   const v=document.getElementById('nameInput').value.trim();
   state.name=v||"du"; save(); renderHome(); show('home');
-  toast("👋 Willkommen, "+state.name+"!");
+  toast("👋 Los geht’s!");
 }
 function changeName(){
   const v=prompt("Neuer Name:",state.name);
