@@ -29,3 +29,6 @@ Ein persönlicher Lerntrainer für die IHK-Prüfung **„Geprüfte/r Fachwirt/in
 | 6 · Marketing & Öffentlichkeitsarbeit | 160 |
 
 Davon 502 Multiple-Choice-, 367 Karteikarten- und 186 Rechenaufgaben; 236 davon sind schwere **„IHK-Kracher"** (werden alle ~15 Fragen gezielt eingestreut). Jede Frage stammt aus dem Kursmaterial und den echten IHK-Prüfungen; alle Rechenaufgaben und Fakten wurden gegengeprüft.
+
+## 🛠️ Technische Dokumentation
+Aufbau, Datenmodell, Lernlogik, Deployment und Wartung sind in der [**DOKUMENTATION.md**](DOKUMENTATION.md) beschrieben.
